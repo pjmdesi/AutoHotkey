@@ -2,14 +2,16 @@
 
 ; Variable to store mouse hidden state
 hidden := false
-g_RawInputHook := 0
-F1:: global g_RawInputHook := g_RawInputHook ? 0 : MouseRawInputHook(MouseMovedEvent, 1)
-Esc:: ExitApp
 
+; Variable to store raw input hook state
+g_RawInputHook := 0
+
+; Function to handle mouse moved event
 MouseMovedEvent(x, y, info) {
     ShowCursor()
 }
 
+; Stolen from: https://www.autohotkey.com/boards/viewtoGGGGGGGpic.php?style=2&t=134109
 ; Can be modified to get output from multiple input devices
 ; In AHK v2.1 the WM_INPUT message can be registered to a custom GUI, not the script itself (to prevent conflicts)
 class MouseRawInputHook {
