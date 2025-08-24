@@ -1,17 +1,30 @@
 ﻿#Requires AutoHotkey v2.0
 
+Thread "interrupt", 0  ;//Make all threads always-interruptible.
+
 ; Variable to store mouse hidden state
 hidden := false
 
+hideTimer := 0 ; Initialize the timer variable
+hideTimerTime := 300000 ; Set the timer time to 5 minutes
+
 ; Variable to store raw input hook state
-g_RawInputHook := 0
+g_RawInputHook := MouseRawInputHook(MouseMovedEvent, 1)
+
 
 ; Function to handle mouse moved event
 MouseMovedEvent(x, y, info) {
-    ShowCursor()
+    if (hidden) {
+        ; If mouse is hidden, show it
+        ShowCursor()
+    }
+    else {
+        ; If mouse is not hidden, hide it
+        global hideTimer := SetTimer(HideCursor, -hideTimerTime)
+    }
 }
 
-; Stolen from: https://www.autohotkey.com/boards/viewtoGGGGGGGpic.php?style=2&t=134109
+; Taken from: https://www.autohotkey.com/boards/viewtoGGGGGGGpic.php?style=2&t=134109
 ; Can be modified to get output from multiple input devices
 ; In AHK v2.1 the WM_INPUT message can be registered to a custom GUI, not the script itself (to prevent conflicts)
 class MouseRawInputHook {
@@ -88,21 +101,19 @@ ShowCursor() {
     ; Show mouse
     Run "D:\Deployable Utilities\nomousy\nomousy.exe"
     ; Set hidden state to false
-    hidden := false
-
-    global g_RawInputHook := 0
+    global hidden := false
 }
 
 HideCursor() {
     ; Hide mouse
     Run "D:\Deployable Utilities\nomousy\nomousy.exe /hide"
     ; Set hidden state to true
-    hidden := true
+    global hidden := true
 
-    global g_RawInputHook := g_RawInputHook ? 0 : MouseRawInputHook(MouseMovedEvent, 1)
+    global hideTimer := SetTimer(HideCursor, 0) ; stop the timer
 }
 
-#NumpadMult:: ; Ctrl + Alt + Shift + M
+#NumpadMult::
 {
     ; If mouse is hidden
     if (hidden)
